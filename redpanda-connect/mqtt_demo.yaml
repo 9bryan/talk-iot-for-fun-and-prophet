@@ -1,0 +1,43 @@
+---
+input:
+  label: mqtt_in
+  mqtt:
+    urls:
+      - tls://xxxxxxxxxx-ats.iot.us-west-2.amazonaws.com:8883
+    connect_timeout: 30s
+    topics: ["#"]
+    tls:
+      enabled: true
+      root_cas: "${secrets.MQTT_DEMO_AWS_ROOT_CA}"
+      client_certs:
+        - cert: "${secrets.MQTT_DEMO_CERT}"
+          key: "${secrets.MQTT_DEMO_KEY}"
+
+pipeline:
+  processors:
+    - bloblang: |
+        meta key = this.device_id
+    - schema_registry_encode:
+        url: https://schema-registry-xxxxxxxx.xxxxxxxxxx.byoc.prd.cloud.redpanda.com:30081
+        subject: environment-data-value
+        basic_auth:
+          enabled: true
+          username: mqtt_demo
+          password: ${secrets.MQTT_DEMO_REDPANDA}
+        avro_raw_json: true
+
+output:
+  label: environment_data_publish
+  reject_errored:
+    kafka_franz:
+      seed_brokers:
+        - ${REDPANDA_BROKERS}
+      topic: environment-data
+      key: ${! meta("key") }
+      compression: snappy
+      tls:
+        enabled: true
+      sasl:
+        - mechanism: SCRAM-SHA-256
+          username: mqtt_demo
+          password: ${secrets.MQTT_DEMO_REDPANDA}

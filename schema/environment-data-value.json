@@ -1,0 +1,27 @@
+{
+    "type": "record",
+    "name": "EnvironmentData",
+    "namespace": "com.example.sensors",
+    "fields": [
+        {
+            "name": "device_id",
+            "type": "string"
+        },
+        {
+            "name": "uuid",
+            "type": "string"
+        },
+        {
+            "name": "time",
+            "type": "string"
+        },
+        {
+            "name": "temperature",
+            "type": "float"
+        },
+        {
+            "name": "humidity",
+            "type": "float"
+        }
+    ]
+}
